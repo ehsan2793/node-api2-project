@@ -1,7 +1,7 @@
 // implement your posts router here
 
 const router = require('express').Router();
-const { find, findById, insert, update } = require('./posts-model');
+const { find, findById, insert, update, remove } = require('./posts-model');
 
 router.get('/', async (req, res) => {
     const allPost = await find();
@@ -68,6 +68,27 @@ router.put('/:id', async (req, res) => {
         res.status(500).json({
             message: 'The post information could not be modified',
         });
+    }
+});
+
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
+    const found = await findById(id);
+    try {
+        if (!found) {
+            res
+                .status(404)
+                .json({ message: 'The post with the specified ID does not exist' });
+        } else {
+            const deletedpost = await remove(id);
+            if (deletedpost) {
+                res.status(201).json(found);
+            }
+        }
+    } catch (error) {
+        res
+            .status(500)
+            .json({ message: 'The comments information could not be retrieved' });
     }
 });
 
