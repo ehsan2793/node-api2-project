@@ -1,7 +1,7 @@
 // implement your posts router here
 
 const router = require('express').Router();
-const { find, findById } = require('./posts-model');
+const { find, findById, insert } = require('./posts-model');
 
 router.get('/', async (req, res) => {
     const allPost = await find();
@@ -23,6 +23,25 @@ router.get('/:id', async (req, res) => {
         res
             .status(500)
             .json({ message: 'The post information could not be retrieved' });
+    }
+});
+
+router.post('/', async (req, res) => {
+    try {
+        const newPost = req.body;
+        if (!newPost.title || !newPost.contents) {
+            res.status(400).json({
+                message: 'Please provide title and contents for the post',
+            });
+        } else {
+            const post = await insert(newPost);
+            const newlyMadePost = await findById(post.id);
+            res.status(201).json(newlyMadePost);
+        }
+    } catch (error) {
+        res.status(500).json({
+            message: 'There was an error while saving the post to the database',
+        });
     }
 });
 
